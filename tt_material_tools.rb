@@ -4,6 +4,9 @@
 #-----------------------------------------------------------------------------
 #
 # CHANGELOG
+# 2.5.2 - 04.10.2011
+#    * Fixed bug in Remove From Selection.
+#
 # 2.5.1 - 29.06.2011
 #    * Fixed typo bug in Remove From Selection.
 #
@@ -61,7 +64,7 @@ module TT::Plugins::MaterialTools
   
   ### CONSTANTS ### --------------------------------------------------------
   
-  VERSION = '2.5.1'
+  VERSION = '2.5.2'
   
   
   ### MENU & TOOLBARS ### --------------------------------------------------
@@ -83,10 +86,43 @@ module TT::Plugins::MaterialTools
     m.add_item('Ensure Unique Filenames')     { self.ensure_unique_texture_names() }
     m.add_separator
     m.add_item('Paint Roofs')                 { self.paint_selected_roofs() }
+    m.add_separator
+    m.add_item('Transparent Material to Backside') { self.transparent_to_backside() }
   end 
   
   
   ### MAIN SCRIPT ### ------------------------------------------------------
+  
+  
+  def self.transparent_to_backside
+    model = Sketchup.active_model
+    
+		TT::Model.start_operation( 'Transparent Material to Backside' )
+		
+		definitions = Set.new
+		entities = model.selection.to_a
+    
+    size = TT::Entities.count_unique_entity( entities )
+    progress = TT::Progressbar.new( size, 'Transparent Material to Backside' )
+		
+		until entities.empty?
+      progress.next
+			e = entities.shift
+			if e.is_a?( Sketchup::Face )
+				next unless e.material
+        next unless e.material.alpha < 1.0
+        e.back_material = e.material
+			elsif TT::Instance.is?( e )
+        definition = TT::Instance.definition( e )
+        unless definitions.include?( definition )
+					entities += definition.entities.to_a
+					definitions.insert( definition )
+				end
+			end
+		end
+		
+		model.commit_operation
+  end
   
   
   def self.paint_selected_roofs
@@ -196,6 +232,10 @@ module TT::Plugins::MaterialTools
       buffer << "  Size: #{t.image_width}x#{t.image_height} pixels\n"
       buffer << "  Size: #{self.readable_file_size(size*3, 2)} estimated uncompressed RGB\n"
       buffer << "  Size: #{self.readable_file_size(size*4, 2)} estimated uncompressed RGBA\n"
+      if File.exist?( t.filename )
+        disksize = File.size( t.filename )
+        buffer << "  Size: #{self.readable_file_size(disksize, 2)} on disk\n"
+      end
       buffer << "  File: #{file}\n"
       buffer << "  Path: #{path}\n"
     }
@@ -429,32 +469,23 @@ module TT::Plugins::MaterialTools
   def self.remove_all_from_selection
     # Variables
     model = Sketchup.active_model
-    sel = model.selection
-    definitions = []
-    
     TT::Model.start_operation('Remove Selection Material')
-    
-    sel.each { |e|
-      if TT::Instance.is?( e )
-        parent = TT::Instance.definition( e )
-        next if definitions.include?(parent)
-        parent.entities.each { |ents|
-          # Remove material
-          ents.material = nil
-          if ents.respond_to?( :back_material )
-            ents.back_material = nil
-          end
-        }
-        definitions.push(parent)
-      elsif e.respond_to?( :material )
-        e.material = nil
-        if e.respond_to?( :back_material )
-          e.back_material = nil
-        end
-      end
-    }
-    
+    self.remove_material( model.selection )
     model.commit_operation
+  end
+  
+
+  def self.remove_material( entities, processed_definitions = [] )
+    for e in entities
+      e.material = nil if e.respond_to?( :material )
+      e.back_material = nil if e.respond_to?( :back_material )
+      if TT::Instance.is?( e )
+        definition = TT::Instance.definition( e )
+        next if processed_definitions.include?( definition )
+        processed_definitions << definition
+        self.remove_material( definition.entities, processed_definitions )
+      end
+    end
   end
   
   
@@ -531,8 +562,13 @@ module TT::Plugins::MaterialTools
   
   ### DEBUG ### ------------------------------------------------------------
   
+  # TT::Plugins::MaterialTools.reload
   def self.reload
+    original_verbose = $VERBOSE
+    $VERBOSE = nil
     load __FILE__
+  ensure
+    $VERBOSE = original_verbose
   end
   
 end # module
