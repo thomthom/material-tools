@@ -4,6 +4,11 @@
 #-----------------------------------------------------------------------------
 #
 # CHANGELOG
+# 2.6.0 - 16.01.2013
+#    * Added Transparent Material to Backside.
+#    * Added support for TT_Lib2.
+#    * Added support Fredo updater.
+#
 # 2.5.2 - 04.10.2011
 #    * Fixed bug in Remove From Selection.
 #
@@ -54,22 +59,51 @@
 #-----------------------------------------------------------------------------
 
 require 'sketchup.rb'
-require 'TT_Lib2/core.rb'
+begin
+  require 'TT_Lib2/core.rb'
+rescue LoadError => e
+  module TT
+    if @lib2_update.nil?
+      url = 'http://www.thomthom.net/software/sketchup/tt_lib2/errors/not-installed'
+      options = {
+        :dialog_title => 'TT_Lib² Not Installed',
+        :scrollable => false, :resizable => false, :left => 200, :top => 200
+      }
+      w = UI::WebDialog.new( options )
+      w.set_size( 500, 300 )
+      w.set_url( "#{url}?plugin=#{File.basename( __FILE__ )}" )
+      w.show
+      @lib2_update = w
+    end
+  end
+end
 
-TT::Lib.compatible?('2.4.0', 'TT Material Tools')
 
 #-----------------------------------------------------------------------------
 
+if defined?( TT::Lib ) && TT::Lib.compatible?( '2.7.0', 'Material Tools' )
+
 module TT::Plugins::MaterialTools
   
-  ### CONSTANTS ### --------------------------------------------------------
   
-  VERSION = '2.5.2'
+  ### CONSTANTS ### ------------------------------------------------------------
+  
+  # Plugin information
+  PLUGIN_ID       = 'TT_MaterialTools'.freeze
+  PLUGIN_NAME     = 'Material Tools'.freeze
+  PLUGIN_VERSION  = TT::Version.new(2,6,0).freeze
+  
+  # Version information
+  RELEASE_DATE    = '16 Jan 13'.freeze
+  
+  # Resource paths
+  PATH_ROOT   = File.dirname( __FILE__ ).freeze
+  PATH        = File.join( PATH_ROOT, 'TT_MaterialTools' ).freeze
   
   
   ### MENU & TOOLBARS ### --------------------------------------------------
   
-  unless file_loaded?( File.basename(__FILE__) )
+  unless file_loaded?( __FILE__ )
     m = TT.menu('Plugins').add_submenu('Material Tools')
     m.add_item('Instance Material to Faces')  { self.instance_materials_to_faces() }
     m.add_separator
@@ -89,6 +123,22 @@ module TT::Plugins::MaterialTools
     m.add_separator
     m.add_item('Transparent Material to Backside') { self.transparent_to_backside() }
   end 
+  
+  
+  ### LIB FREDO UPDATER ### ----------------------------------------------------
+  
+  # @return [Hash]
+  # @since 1.0.0
+  def self.register_plugin_for_LibFredo6
+    {   
+      :name => PLUGIN_NAME,
+      :author => 'thomthom',
+      :version => PLUGIN_VERSION.to_s,
+      :date => RELEASE_DATE,   
+      :description => 'Collection of material tools.',
+      :link_info => 'http://sketchucation.com/forums/viewtopic.php?t=17587'
+    }
+  end
   
   
   ### MAIN SCRIPT ### ------------------------------------------------------
@@ -573,6 +623,11 @@ module TT::Plugins::MaterialTools
   
 end # module
 
+
+end # if TT_Lib
+
 #-----------------------------------------------------------------------------
-file_loaded( File.basename(__FILE__) )
+
+file_loaded( __FILE__ )
+
 #-----------------------------------------------------------------------------
