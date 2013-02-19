@@ -94,7 +94,7 @@ module TT::Plugins::MaterialTools
   PLUGIN_VERSION  = TT::Version.new(2,6,0).freeze
   
   # Version information
-  RELEASE_DATE    = '16 Jan 13'.freeze
+  RELEASE_DATE    = '19 Feb 13'.freeze
   
   # Resource paths
   PATH_ROOT   = File.dirname( __FILE__ ).freeze
