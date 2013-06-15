@@ -151,6 +151,7 @@ module TT::Plugins::MaterialTools
 		
 		definitions = Set.new
 		entities = model.selection.to_a
+    entities = model.active_entities.to_a if entities.empty?
     
     size = TT::Entities.count_unique_entity( entities )
     progress = TT::Progressbar.new( size, 'Transparent Material to Backside' )
