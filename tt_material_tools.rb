@@ -66,7 +66,7 @@ rescue LoadError => e
     if @lib2_update.nil?
       url = 'http://www.thomthom.net/software/sketchup/tt_lib2/errors/not-installed'
       options = {
-        :dialog_title => 'TT_Lib² Not Installed',
+        :dialog_title => 'TT_LibÂ² Not Installed',
         :scrollable => false, :resizable => false, :left => 200, :top => 200
       }
       w = UI::WebDialog.new( options )
@@ -249,10 +249,10 @@ module TT::Plugins::MaterialTools
   # http://www.ruby-forum.com/topic/126876
   def self.readable_file_size(size, precision)
     case
-      when size == 1 : "1 Byte"
-      when size < KILO_SIZE : "%d Bytes" % size
-      when size < MEGA_SIZE : "%.#{precision}f KB" % (size / KILO_SIZE)
-      when size < GIGA_SIZE : "%.#{precision}f MB" % (size / MEGA_SIZE)
+      when size == 1 then "1 Byte"
+      when size < KILO_SIZE then "%d Bytes" % size
+      when size < MEGA_SIZE then "%.#{precision}f KB" % (size / KILO_SIZE)
+      when size < GIGA_SIZE then "%.#{precision}f MB" % (size / MEGA_SIZE)
       else "%.#{precision}f GB" % (size / GIGA_SIZE)
     end
   end
