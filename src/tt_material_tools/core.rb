@@ -1,62 +1,9 @@
-#-----------------------------------------------------------------------------
-# Compatible: SketchUp 7 (PC)
-#             (other versions untested)
-#-----------------------------------------------------------------------------
-#
-# CHANGELOG
-# 2.6.0 - 16.01.2013
-#    * Added Transparent Material to Backside.
-#    * Added support for TT_Lib2.
-#    * Added support Fredo updater.
-#
-# 2.5.2 - 04.10.2011
-#    * Fixed bug in Remove From Selection.
-#
-# 2.5.1 - 29.06.2011
-#    * Fixed typo bug in Remove From Selection.
-#
-# 2.5.0 - 15.12.2010
-#    * Paint roof.
-#
-# 2.4.0 - 15.12.2010
-#    * Ensure Unique Filenames.
-#
-# 2.3.0 - 31.10.2010
-#    * Remove All Textures.
-#
-# 2.2.0 - 21.10.2010
-#    * Remove All Backface Materials.
-#
-# 2.1.0 - 28.09.2010
-#    * Instance Material to Faces.
-#
-# 2.0.1 - 27.09.2010
-#    * 'List Textures in Console' opens the Ruby Console.
-#
-# 2.0.0 - 06.09.2010
-#    * Uses TT_Lib2.
-#    * Bug fixes.
-#    * Apply Colour Adjustments.
-#
-# 1.3.0 - 08.07.2009
-#    * Keep only Group/Component materials.
-#
-# 1.2.0 - 02.04.2009
-#    * Remove All Materials from Selection.
-#
-# 1.1.0 - 16.03.2009
-#    * Remove All Materials.
-#    * Remove Edge Materials.
-#
-# 1.0.0 - 04.03.2009
-#    * Remove Material.
-#
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 #
 # Thomas Thomassen
 # thomas[at]thomthom[dot]net
 #
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 require 'sketchup.rb'
 begin
@@ -79,30 +26,15 @@ rescue LoadError => e
 end
 
 
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 if defined?( TT::Lib ) && TT::Lib.compatible?( '2.7.0', 'Material Tools' )
 
 module TT::Plugins::MaterialTools
-  
-  
-  ### CONSTANTS ### ------------------------------------------------------------
-  
-  # Plugin information
-  PLUGIN_ID       = 'TT_MaterialTools'.freeze
-  PLUGIN_NAME     = 'Material Tools'.freeze
-  PLUGIN_VERSION  = TT::Version.new(2,6,0).freeze
-  
-  # Version information
-  RELEASE_DATE    = '19 Feb 13'.freeze
-  
-  # Resource paths
-  PATH_ROOT   = File.dirname( __FILE__ ).freeze
-  PATH        = File.join( PATH_ROOT, 'TT_MaterialTools' ).freeze
-  
-  
-  ### MENU & TOOLBARS ### --------------------------------------------------
-  
+
+
+  ### MENU & TOOLBARS ### ------------------------------------------------------
+
   unless file_loaded?( __FILE__ )
     m = TT.menu('Plugins').add_submenu('Material Tools')
     m.add_item('Instance Material to Faces')  { self.instance_materials_to_faces() }
@@ -122,40 +54,24 @@ module TT::Plugins::MaterialTools
     m.add_item('Paint Roofs')                 { self.paint_selected_roofs() }
     m.add_separator
     m.add_item('Transparent Material to Backside') { self.transparent_to_backside() }
-  end 
-  
-  
-  ### LIB FREDO UPDATER ### ----------------------------------------------------
-  
-  # @return [Hash]
-  # @since 1.0.0
-  def self.register_plugin_for_LibFredo6
-    {   
-      :name => PLUGIN_NAME,
-      :author => 'thomthom',
-      :version => PLUGIN_VERSION.to_s,
-      :date => RELEASE_DATE,   
-      :description => 'Collection of material tools.',
-      :link_info => 'http://sketchucation.com/forums/viewtopic.php?t=17587'
-    }
   end
-  
-  
-  ### MAIN SCRIPT ### ------------------------------------------------------
-  
-  
+
+
+  ### MAIN SCRIPT ### ----------------------------------------------------------
+
+
   def self.transparent_to_backside
     model = Sketchup.active_model
-    
+
 		TT::Model.start_operation( 'Transparent Material to Backside' )
-		
+
 		definitions = Set.new
 		entities = model.selection.to_a
     entities = model.active_entities.to_a if entities.empty?
-    
+
     size = TT::Entities.count_unique_entity( entities )
     progress = TT::Progressbar.new( size, 'Transparent Material to Backside' )
-		
+
 		until entities.empty?
       progress.next
 			e = entities.shift
@@ -171,27 +87,27 @@ module TT::Plugins::MaterialTools
 				end
 			end
 		end
-		
+
 		model.commit_operation
   end
-  
-  
+
+
   def self.paint_selected_roofs
     model = Sketchup.active_model
     return if model.selection.empty?
-    
+
     material = model.materials.current
     unless model.materials.include?( material )
       UI.messagebox( 'Select a material already in the model. Not from the libraries.' )
       return
     end
-    
+
     TT::Model.start_operation( 'Paint Roofs' )
     self.paint_roofs( material, model.selection )
     model.commit_operation
   end
-  
-  
+
+
   def self.paint_roofs( material, entities )
     for e in entities
       if TT::Instance.is?( e )
@@ -204,8 +120,8 @@ module TT::Plugins::MaterialTools
       end
     end
   end
-  
-  
+
+
   def self.remove_textures
     model = Sketchup.active_model
     TT::Model.start_operation('Remove All Textures')
@@ -214,16 +130,16 @@ module TT::Plugins::MaterialTools
     }
     model.commit_operation
   end
-  
-  
-  
+
+
+
   def self.instance_materials_to_faces
     model = Sketchup.active_model
     TT::Model.start_operation('Instance Material to Faces')
     self.instance_material_to_faces( model.selection, nil )
     model.commit_operation
   end
-  
+
   def self.instance_material_to_faces( entities, material )
     for e in entities
       if TT::Instance.is?( e )
@@ -237,11 +153,8 @@ module TT::Plugins::MaterialTools
       end
     end
   end
-  
-  
-  
-  
-  
+
+
   GIGA_SIZE = 1073741824.0
   MEGA_SIZE = 1048576.0
   KILO_SIZE = 1024.0
@@ -257,7 +170,7 @@ module TT::Plugins::MaterialTools
       else "%.#{precision}f GB" % (size / GIGA_SIZE)
     end
   end
-  
+
   def self.list_textures
     Sketchup.send_action('showRubyPanel:')
     # Collect textures and sort by size
@@ -293,8 +206,8 @@ module TT::Plugins::MaterialTools
     puts buffer
     puts "---"
   end
-  
-  
+
+
   # Applies the colour adjustments for colourized/adjusted textures and bakes
   # them into a texture file.
   def self.apply_adjustments
@@ -309,7 +222,7 @@ module TT::Plugins::MaterialTools
       p filename
       p File.delete( filename )
     }
-    
+
     TT::Model.start_operation('Apply Material Colour Adjustments')
     puts '=== APPLY MATERIAL COLOUR ADJUSTMENTS ==='
     model = Sketchup.active_model
@@ -322,7 +235,7 @@ module TT::Plugins::MaterialTools
     used_filenames = []
     begin
       materials.each { |m|
-        ext = File.extname( m.texture.filename )  
+        ext = File.extname( m.texture.filename )
         basename = File.basename( m.texture.filename, ext )
         filename = "#{basename}#{ext}"
         # Ensure unique name. Filename + Number. Increase
@@ -341,7 +254,7 @@ module TT::Plugins::MaterialTools
           end
         end
         used_filenames << filename
-        # 
+        #
         file = File.join( tmp_path, filename )
         puts "Processing #{filename} ..."
         g.material = m
@@ -372,16 +285,16 @@ module TT::Plugins::MaterialTools
     model.commit_operation
     puts "Done! #{materials.size} materials processed."
   end
-  
-  
+
+
   def self.is_ascii?( string )
     string.each_byte { |byte|
       return false if byte > 127
     }
     return true
   end
-  
-  
+
+
   # Ensure unique texture filenames for broken file references..
   def self.ensure_unique_texture_names
     # Ensure an empty temp folder exists
@@ -395,7 +308,7 @@ module TT::Plugins::MaterialTools
       p filename
       p File.delete( filename )
     }
-    
+
     TT::Model.start_operation('Ensure Unique Texture Filenames')
     puts '=== ENSURE UNIQUE TEXTURE FILENAMES ==='
     model = Sketchup.active_model
@@ -413,10 +326,10 @@ module TT::Plugins::MaterialTools
     used_filenames = []
     begin
       materials.each { |m|
-        ext = File.extname( m.texture.filename )  
+        ext = File.extname( m.texture.filename )
         basename = File.basename( m.texture.filename, ext )
         filename = "#{basename}#{ext}"
-        
+
         # If the filename was not in the list already there is no need to
         # rename.
         unless used_filenames.include?( filename )
@@ -424,7 +337,7 @@ module TT::Plugins::MaterialTools
           used_filenames << filename
           next
         end
-        
+
         # Ensure unique name. Filename + Number. Increase
         # number until filename is unique
         match = basename.match( /(.+)(\d)$/ )
@@ -438,9 +351,9 @@ module TT::Plugins::MaterialTools
         while used_filenames.include?( filename = "#{base}#{copy}#{ext}" )
           copy.next!
         end
-        
+
         used_filenames << filename
-        
+
         # Write out texture to temp path with new file and load back into
         # the material.
         puts "> Rename #{m.texture.filename} to #{filename}"
@@ -472,27 +385,27 @@ module TT::Plugins::MaterialTools
     model.commit_operation
     puts "Done! #{materials.size} materials processed."
   end
-  
-  
+
+
   # Specific From Selection
   def self.remove_spesific
     model = Sketchup.active_model
     sel = model.selection
     definitions = []
-    
+
     # Prompt for material to remove
     materials = model.materials.map { |m| m.name }.join('|')
-    
+
     prompts = ['What material to remove?']
     defaults = ['Enter name']
 
     result = UI.inputbox(prompts, defaults, [materials], 'Remove material.')
     return if result == false
-    
+
     material = model.materials[ result[0] ]
-    
+
     TT::Model.start_operation('Remove Material')
-    
+
     sel.each { |e|
       if TT::Instance.is?( e )
         parent = TT::Instance.definition( e )
@@ -511,11 +424,11 @@ module TT::Plugins::MaterialTools
         end
       end
     }
-    
+
     model.commit_operation
   end
-  
-  
+
+
   # Remove From Selection
   def self.remove_all_from_selection
     # Variables
@@ -524,7 +437,7 @@ module TT::Plugins::MaterialTools
     self.remove_material( model.selection )
     model.commit_operation
   end
-  
+
 
   def self.remove_material( entities, processed_definitions = [] )
     for e in entities
@@ -538,8 +451,8 @@ module TT::Plugins::MaterialTools
       end
     end
   end
-  
-  
+
+
   # Remove From Entire Model
   def self.remove_all
     model = Sketchup.active_model
@@ -557,8 +470,8 @@ module TT::Plugins::MaterialTools
     }
     model.commit_operation
   end
-  
-  
+
+
   # Remove From All Edges
   def self.remove_edge_materials
     model = Sketchup.active_model
@@ -574,8 +487,8 @@ module TT::Plugins::MaterialTools
     }
     model.commit_operation
   end
-  
-  
+
+
   # Remove Faces and Edges
   def self.remove_face_edge_materials
     TT::Model.start_operation('Keep only C/G materials')
@@ -586,7 +499,7 @@ module TT::Plugins::MaterialTools
     }
     Sketchup.active_model.commit_operation
   end
-  
+
   def self.remove_materials(entities)
     entities.each { |e|
       next if TT::Instance.is?( e )
@@ -594,13 +507,13 @@ module TT::Plugins::MaterialTools
       e.back_material = nil if e.respond_to?( :back_material )
     }
   end
-  
+
   def self.remove_backface_materials(entities)
     entities.each { |e|
       e.back_material = nil if e.respond_to?( :back_material )
     }
   end
-  
+
   def self.remove_all_backface_materials
     TT::Model.start_operation('Remove Backface Materials')
     self.remove_backface_materials(Sketchup.active_model.entities)
@@ -610,25 +523,44 @@ module TT::Plugins::MaterialTools
     }
     Sketchup.active_model.commit_operation
   end
-  
-  ### DEBUG ### ------------------------------------------------------------
-  
-  # TT::Plugins::MaterialTools.reload
-  def self.reload
+
+  ### DEBUG ### ----------------------------------------------------------------
+
+  # @note Debug method to reload the plugin.
+  #
+  # @example
+  #   TT::Plugins::MaterialTools.reload
+  #
+  # @param [Boolean] tt_lib Reloads TT_Lib2 if +true+.
+  #
+  # @return [Integer] Number of files reloaded.
+  # @since 1.0.0
+  def self.reload( tt_lib = false )
     original_verbose = $VERBOSE
     $VERBOSE = nil
+    TT::Lib.reload if tt_lib
+    # Core file (this)
     load __FILE__
+    # Supporting files
+    if defined?( PATH ) && File.exist?( PATH )
+      x = Dir.glob( File.join(PATH, '*.{rb,rbs}') ).each { |file|
+        load file
+      }
+      x.length + 1
+    else
+      1
+    end
   ensure
     $VERBOSE = original_verbose
   end
-  
+
 end # module
 
 
 end # if TT_Lib
 
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 file_loaded( __FILE__ )
 
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
