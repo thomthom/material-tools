@@ -100,7 +100,6 @@ module TT::Plugins::MaterialTools
 
   def self.paint_selected_roofs
     model = Sketchup.active_model
-    return if model.selection.empty?
 
     material = model.materials.current
     unless model.materials.include?( material )
@@ -108,8 +107,10 @@ module TT::Plugins::MaterialTools
       return
     end
 
+    selection = model.selection
+    entities = ( selection.empty? ) ? model.active_entities : selection.to_a
     TT::Model.start_operation( 'Paint Roofs' )
-    self.paint_roofs( material, model.selection )
+    self.paint_roofs( material, entities )
     model.commit_operation
   end
 
