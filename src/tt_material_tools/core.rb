@@ -394,13 +394,14 @@ module TT::Plugins::MaterialTools
   # Specific From Selection
   def self.remove_spesific
     model = Sketchup.active_model
-    sel = model.selection
-    definitions = []
+    selection = model.selection
+    entities = ( selection.empty? ) ? model.active_entities.to_a : selection.to_a
+    definitions = {}
 
     # Prompt for material to remove
     materials = model.materials.map { |m| m.name }.join('|')
 
-    prompts = ['What material to remove?']
+    prompts = ['What material to remove? ']
     defaults = ['Enter name']
 
     result = UI.inputbox(prompts, defaults, [materials], 'Remove material.')
@@ -410,24 +411,23 @@ module TT::Plugins::MaterialTools
 
     TT::Model.start_operation('Remove Material')
 
-    sel.each { |e|
-      if TT::Instance.is?( e )
-        parent = TT::Instance.definition( e )
-        next if definitions.include?(parent)
-        parent.entities.each { |ents|
-          ents.material = nil if ents.material == material
-          if ents.respond_to?( :back_material )
-            ents.back_material = nil if ents.back_material == material
-          end
-        }
-        definitions << parent
-      elsif e.respond_to?( :material )
-        e.material = nil if e.material == material
-        if ents.respond_to?( :back_material )
-          e.back_material = nil if e.back_material == material
-        end
+    until entities.empty?
+      entity = entities.shift
+      # Remove material.
+      if entity.respond_to?( :material )
+        entity.material = nil if entity.material == material
       end
-    }
+      if entity.respond_to?( :back_material )
+        entity.back_material = nil if entity.back_material == material
+      end
+      # Process nested entites.
+      if TT::Instance.is?( entity )
+        definition = TT::Instance.definition( entity )
+        next if definitions[ definition ]
+        entities.concat( definition.entities.to_a )
+        definitions[ definition ] = definition
+      end
+    end
 
     model.commit_operation
   end
