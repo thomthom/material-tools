@@ -42,7 +42,7 @@ module TT::Plugins::MaterialTools
     m.add_item('Remove From Entire Model')    { self.remove_all() }
     m.add_item('Remove From Selection')       { self.remove_all_from_selection() }
     m.add_item('Remove From All Edges')       { self.remove_edge_materials() }
-    m.add_item('Remove From Faces and Edges') { self.remove_face_edge_materials() }
+    m.add_item('Remove From All Faces and Edges') { self.remove_face_edge_materials() }
     m.add_item('Remove All Backface Materials') { self.remove_all_backface_materials() }
     m.add_item('Remove Specific Material')    { self.remove_spesific() }
     m.add_item('Remove All Textures')         { self.remove_textures() }
