@@ -211,17 +211,7 @@ module TT::Plugins::MaterialTools
   # Applies the colour adjustments for colourized/adjusted textures and bakes
   # them into a texture file.
   def self.apply_adjustments
-    # Ensure an empty temp folder exists
-    #root_path = File.dirname( File.expand_path( __FILE__ ) )
-    root_path = TT::System.temp_path
-    path = File.join( root_path, 'TT Material Tools' )
-    tmp_path = File.join( path, 'Temp' )
-    Dir.mkdir( path ) unless File.exists?( path )
-    Dir.mkdir( tmp_path ) unless File.exists?( tmp_path )
-    Dir.glob( File.join( tmp_path, '*') ).each { |filename|
-      p filename
-      p File.delete( filename )
-    }
+    tmp_path = self.clean_temp_path
 
     TT::Model.start_operation('Apply Material Colour Adjustments')
     puts '=== APPLY MATERIAL COLOUR ADJUSTMENTS ==='
@@ -297,17 +287,7 @@ module TT::Plugins::MaterialTools
 
   # Ensure unique texture filenames for broken file references..
   def self.ensure_unique_texture_names
-    # Ensure an empty temp folder exists
-    #root_path = File.dirname( File.expand_path( __FILE__ ) )
-    root_path = TT::System.temp_path
-    path = File.join( root_path, 'TT Material Tools' )
-    tmp_path = File.join( path, 'Temp' )
-    Dir.mkdir( path ) unless File.exists?( path )
-    Dir.mkdir( tmp_path ) unless File.exists?( tmp_path )
-    Dir.glob( File.join( tmp_path, '*') ).each { |filename|
-      p filename
-      p File.delete( filename )
-    }
+    tmp_path = self.clean_temp_path
 
     TT::Model.start_operation('Ensure Unique Texture Filenames')
     puts '=== ENSURE UNIQUE TEXTURE FILENAMES ==='
@@ -523,6 +503,22 @@ module TT::Plugins::MaterialTools
     }
     Sketchup.active_model.commit_operation
   end
+
+
+  ### Generic ##################################################################
+
+  # @since 2.7.0
+  # @return [String] temp path
+  def self.clean_temp_path
+    path = File.join( TT::System.temp_path, PLUGIN_ID )
+    Dir.mkdir( path ) unless File.exists?( path )
+    Dir.glob( File.join( path, '*') ).each { |filename|
+      p filename
+      p File.delete( filename )
+    }
+    path
+  end
+
 
   ### DEBUG ### ----------------------------------------------------------------
 
