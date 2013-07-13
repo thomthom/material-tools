@@ -60,6 +60,9 @@ module TT::Plugins::MaterialTools
   ### MAIN SCRIPT ### ----------------------------------------------------------
 
 
+  ### Transparent Material to Backside #########################################
+
+
   def self.transparent_to_backside
     model = Sketchup.active_model
 
@@ -92,6 +95,9 @@ module TT::Plugins::MaterialTools
   end
 
 
+  ### Paint Roofs ##############################################################
+
+
   def self.paint_selected_roofs
     model = Sketchup.active_model
     return if model.selection.empty?
@@ -107,7 +113,6 @@ module TT::Plugins::MaterialTools
     model.commit_operation
   end
 
-
   def self.paint_roofs( material, entities )
     for e in entities
       if TT::Instance.is?( e )
@@ -122,6 +127,9 @@ module TT::Plugins::MaterialTools
   end
 
 
+  ### Remove All Textures ######################################################
+
+
   def self.remove_textures
     model = Sketchup.active_model
     TT::Model.start_operation('Remove All Textures')
@@ -131,6 +139,8 @@ module TT::Plugins::MaterialTools
     model.commit_operation
   end
 
+
+  ### Instance Material to Faces ###############################################
 
 
   def self.instance_materials_to_faces
@@ -153,6 +163,9 @@ module TT::Plugins::MaterialTools
       end
     end
   end
+
+
+  ### List Textures in Console #################################################
 
 
   GIGA_SIZE = 1073741824.0
@@ -206,6 +219,9 @@ module TT::Plugins::MaterialTools
     puts buffer
     puts "---"
   end
+
+
+  ### Apply Colour Adjustments #################################################
 
 
   # Applies the colour adjustments for colourized/adjusted textures and bakes
@@ -277,6 +293,9 @@ module TT::Plugins::MaterialTools
   end
 
 
+  ### Ensure Unique Filenames ##################################################
+
+
   def self.is_ascii?( string )
     string.each_byte { |byte|
       return false if byte > 127
@@ -296,7 +315,7 @@ module TT::Plugins::MaterialTools
     materials = model.materials.select { |m|
       m.materialType > 0 &&
       self.is_ascii?( m.texture.filename ) &&
-      File.exists?( m.texture.filename ) == false
+      !File.exists?( m.texture.filename )
     }
     ##materials.each { |m| puts "#{m.name} - #{m.texture.filename}" }
     # Make temp groups/edges for each material and apply
@@ -367,6 +386,9 @@ module TT::Plugins::MaterialTools
   end
 
 
+  ### Remove Specific Material #################################################
+
+
   # Specific From Selection
   def self.remove_spesific
     model = Sketchup.active_model
@@ -409,6 +431,9 @@ module TT::Plugins::MaterialTools
   end
 
 
+  ### Remove From Selection ####################################################
+
+
   # Remove From Selection
   def self.remove_all_from_selection
     # Variables
@@ -433,6 +458,9 @@ module TT::Plugins::MaterialTools
   end
 
 
+  ### Remove From Entire Model #################################################
+
+
   # Remove From Entire Model
   def self.remove_all
     model = Sketchup.active_model
@@ -452,6 +480,9 @@ module TT::Plugins::MaterialTools
   end
 
 
+  ### Remove From All Edges ####################################################
+
+
   # Remove From All Edges
   def self.remove_edge_materials
     model = Sketchup.active_model
@@ -467,6 +498,9 @@ module TT::Plugins::MaterialTools
     }
     model.commit_operation
   end
+
+
+  ### Remove From Faces and Edges ##############################################
 
 
   # Remove Faces and Edges
@@ -487,6 +521,10 @@ module TT::Plugins::MaterialTools
       e.back_material = nil if e.respond_to?( :back_material )
     }
   end
+
+
+  ### Remove All Backface Materials ############################################
+
 
   def self.remove_backface_materials(entities)
     entities.each { |e|
