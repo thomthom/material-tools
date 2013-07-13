@@ -68,7 +68,7 @@ module TT::Plugins::MaterialTools
 
 		TT::Model.start_operation( 'Transparent Material to Backside' )
 
-		definitions = Set.new
+		definitions = {}
 		entities = model.selection.to_a
     entities = model.active_entities.to_a if entities.empty?
 
@@ -84,9 +84,9 @@ module TT::Plugins::MaterialTools
         e.back_material = e.material
 			elsif TT::Instance.is?( e )
         definition = TT::Instance.definition( e )
-        unless definitions.include?( definition )
+        unless definitions[ definition ]
 					entities += definition.entities.to_a
-					definitions.insert( definition )
+					definitions[ definition ] = definition
 				end
 			end
 		end
