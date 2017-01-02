@@ -19,7 +19,7 @@ module TT
   # Plugin information
   PLUGIN_ID       = 'TT_MaterialTools'.freeze
   PLUGIN_NAME     = 'Material Tools'.freeze
-  PLUGIN_VERSION  = '2.7.0'.freeze
+  PLUGIN_VERSION  = '2.7.1'.freeze
 
   # Resource paths
   FILENAMESPACE = File.basename( __FILE__, '.rb' )
@@ -34,7 +34,7 @@ module TT
     ex = SketchupExtension.new( PLUGIN_NAME, loader )
     ex.description = 'Collection of material tools.'
     ex.version     = PLUGIN_VERSION
-    ex.copyright   = 'Thomas Thomassen © 2009–2013'
+    ex.copyright   = 'Thomas Thomassen © 2009–2017'
     ex.creator     = 'Thomas Thomassen (thomas@thomthom.net)'
     Sketchup.register_extension( ex, true )
   end
