@@ -146,6 +146,7 @@ module TT::Plugins::MaterialTools
 
   def self.instance_materials_to_faces
     model = Sketchup.active_model
+    selection = model.selection
     entities = ( selection.empty? ) ? model.active_entities : selection.to_a
     TT::Model.start_operation('Instance Material to Faces')
     self.instance_material_to_faces( entities, nil )
