@@ -318,7 +318,7 @@ module TT::Plugins::MaterialTools
     materials = model.materials.select { |m|
       m.materialType > 0 &&
       self.is_ascii?( m.texture.filename ) &&
-      !File.exists?( m.texture.filename )
+      !File.exist?( m.texture.filename )
     }
     ##materials.each { |m| puts "#{m.name} - #{m.texture.filename}" }
     # Make temp groups/edges for each material and apply
@@ -552,7 +552,7 @@ module TT::Plugins::MaterialTools
   # @return [String] temp path
   def self.clean_temp_path
     path = File.join( TT::System.temp_path, PLUGIN_ID )
-    Dir.mkdir( path ) unless File.exists?( path )
+    Dir.mkdir( path ) unless File.exist?( path )
     Dir.glob( File.join( path, '*') ).each { |filename|
       p filename
       p File.delete( filename )
